@@ -1,0 +1,24 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="NBTExplorer.Avalonia.App"
+             RequestedThemeVariant="Default">
+  <!-- RequestedThemeVariant="Default" makes Avalonia follow the OS light/dark setting.
+       An explicit override lands in settings in Phase 5. -->
+
+  <Application.Styles>
+    <FluentTheme />
+    <!-- DataGrid ships its theme separately from FluentTheme; without this the details view
+         renders unstyled. -->
+    <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+  </Application.Styles>
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://NBTExplorer.Avalonia/Assets/Themes/Colors.axaml" />
+        <ResourceInclude Source="avares://NBTExplorer.Avalonia/Assets/Icons.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+
+</Application>

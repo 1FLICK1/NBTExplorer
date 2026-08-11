@@ -1,0 +1,38 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="NBTExplorer.Avalonia.Views.Dialogs.CreateTagDialog"
+        Title="New tag"
+        Width="440" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False">
+
+  <StackPanel Margin="20" Spacing="16">
+
+    <StackPanel Orientation="Horizontal" Spacing="10">
+      <PathIcon Name="TypeIcon" Width="20" Height="20" VerticalAlignment="Center" />
+      <TextBlock Name="TypeText" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+    </StackPanel>
+
+    <StackPanel Name="NamePanel" Spacing="6">
+      <TextBlock Text="Name" Opacity="0.7" />
+      <TextBox Name="NameBox" />
+    </StackPanel>
+
+    <StackPanel Name="ValuePanel" Spacing="6">
+      <TextBlock Text="Value" Opacity="0.7" />
+      <TextBox Name="ValueBox" />
+    </StackPanel>
+
+    <TextBlock Name="ErrorText" Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+               TextWrapping="Wrap" FontSize="12" IsVisible="False" />
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button Name="OkButton" Content="Create" IsDefault="True" MinWidth="88" Classes="accent" />
+      <Button Name="CancelButton" Content="Cancel" IsCancel="True" MinWidth="88" />
+    </StackPanel>
+  </StackPanel>
+</Window>

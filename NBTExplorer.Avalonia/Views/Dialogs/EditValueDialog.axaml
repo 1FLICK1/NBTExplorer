@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="NBTExplorer.Avalonia.Views.Dialogs.EditValueDialog"
+        Title="Edit value"
+        Width="440" SizeToContent="Height"
+        MinWidth="360"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False">
+
+  <StackPanel Margin="20" Spacing="16">
+    <TextBlock Name="PromptText" TextWrapping="Wrap" Opacity="0.8" />
+
+    <StackPanel Spacing="6">
+      <TextBox Name="ValueBox" AcceptsReturn="False" />
+      <TextBlock Name="ErrorText" Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                 TextWrapping="Wrap" FontSize="12" IsVisible="False" />
+    </StackPanel>
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button Name="OkButton" Content="OK" IsDefault="True" MinWidth="88"
+              Classes="accent" />
+      <Button Name="CancelButton" Content="Cancel" IsCancel="True" MinWidth="88" />
+    </StackPanel>
+  </StackPanel>
+</Window>

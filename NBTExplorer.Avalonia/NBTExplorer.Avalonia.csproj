@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NBTExplorer.Avalonia</RootNamespace>
+    <AssemblyName>NBTExplorer.Avalonia</AssemblyName>
+
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\NBTExplorer\dead_bush.ico</ApplicationIcon>
+
+    <!-- Compiled bindings: binding errors become build errors instead of silent runtime no-ops. -->
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <!--
+    Avalonia 11.3 rather than 12.x: Avalonia.Diagnostics (DevTools) has no 12.x release yet, and
+    11.x is what the documentation and community samples cover. Moving to 12 later is a version
+    bump in this one place.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.*" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.*" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.*" />
+    <!-- The Explorer "details view": resizable, sortable columns with in-cell editing. -->
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.*" />
+    <!-- Cross-platform fallback face so Linux/macOS do not drop to something ugly when
+         Segoe UI Variable is unavailable. -->
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.*" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.*" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NBTModel\NBTModel.Net10.csproj" />
+  </ItemGroup>
+
+  <!-- Substrate types (TagType, TagNode, …) appear directly in the ViewModels; a plain
+       <Reference> is not transitive through <ProjectReference>, so we need our own. -->
+  <Import Project="..\Substrate.props" />
+
+</Project>

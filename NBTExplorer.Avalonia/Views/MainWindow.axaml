@@ -1,0 +1,477 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:NBTExplorer.Avalonia.ViewModels"
+        xmlns:views="using:NBTExplorer.Avalonia.Views"
+        mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="720"
+        x:Class="NBTExplorer.Avalonia.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="{Binding Title}"
+        Width="1180" Height="720"
+        MinWidth="720" MinHeight="460"
+        Background="{DynamicResource WindowSurfaceBrush}">
+
+  <Window.Resources>
+    <ResourceDictionary>
+      <views:ResourceLookupConverter x:Key="Res" />
+      <views:TagTypeNameConverter x:Key="TagTypeName" />
+
+      <!--
+        Win11 list selection is a SUBTLE fill, not a saturated full-bleed accent bar. WinUI's
+        ListViewItem uses a light neutral for the selected state and reserves the accent colour
+        for a small pill on the leading edge.
+
+        These are the resource keys the DataGrid theme actually consumes (verified against
+        Avalonia.Controls.DataGrid 11.3 — styling DataGridRow.Background does nothing, because
+        the theme paints from these instead). They are declared per theme variant because a
+        StaticResource entry cannot reference a themed brush: it resolves at parse time, before
+        the variant is known.
+      -->
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="DataGridRowSelectedBackgroundBrush" Color="#E4E4E4" />
+          <SolidColorBrush x:Key="DataGridRowSelectedHoveredBackgroundBrush" Color="#DCDCDC" />
+          <SolidColorBrush x:Key="DataGridRowSelectedUnfocusedBackgroundBrush" Color="#E9E9E9" />
+          <SolidColorBrush x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundBrush" Color="#DCDCDC" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="DataGridRowSelectedBackgroundBrush" Color="#3A3A3A" />
+          <SolidColorBrush x:Key="DataGridRowSelectedHoveredBackgroundBrush" Color="#454545" />
+          <SolidColorBrush x:Key="DataGridRowSelectedUnfocusedBackgroundBrush" Color="#333333" />
+          <SolidColorBrush x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundBrush" Color="#404040" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+
+      <x:Double x:Key="DataGridRowSelectedBackgroundOpacity">1</x:Double>
+      <x:Double x:Key="DataGridRowSelectedHoveredBackgroundOpacity">1</x:Double>
+      <x:Double x:Key="DataGridRowSelectedUnfocusedBackgroundOpacity">1</x:Double>
+      <x:Double x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundOpacity">1</x:Double>
+
+      <!-- The dashed focus ring around the current cell is a WPF-era idiom that Explorer does
+           not use, and it fights the row-level selection. -->
+      <SolidColorBrush x:Key="DataGridCellFocusVisualPrimaryBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="DataGridCellFocusVisualSecondaryBrush" Color="Transparent" />
+
+      <SolidColorBrush x:Key="DataGridColumnHeaderBackgroundBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="DataGridGridLinesBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="DataGridFillerColumnGridLinesBrush" Color="Transparent" />
+    </ResourceDictionary>
+  </Window.Resources>
+
+  <Window.Styles>
+    <!-- Win11 Explorer command-bar buttons: 32px tall, 4px radius, transparent until hovered. -->
+    <Style Selector="Button.cmd">
+      <Setter Property="Height" Value="32" />
+      <Setter Property="Padding" Value="10,0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.cmd:disabled">
+      <Setter Property="Opacity" Value="0.4" />
+    </Style>
+    <!-- Square icon-only variant, as used for back/forward/up. -->
+    <Style Selector="Button.icon">
+      <Setter Property="Width" Value="32" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.icon:disabled">
+      <Setter Property="Opacity" Value="0.35" />
+    </Style>
+    <Style Selector="Button.crumb">
+      <Setter Property="Height" Value="26" />
+      <Setter Property="Padding" Value="8,0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <!-- Explorer's details view: quiet grid, no heavy borders. -->
+    <Style Selector="DataGrid">
+      <Setter Property="GridLinesVisibility" Value="None" />
+      <Setter Property="HeadersVisibility" Value="Column" />
+      <Setter Property="RowBackground" Value="Transparent" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="RowHeight" Value="32" />
+    </Style>
+    <Style Selector="DataGridColumnHeader">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="FontWeight" Value="Normal" />
+      <Setter Property="Opacity" Value="0.7" />
+      <Setter Property="Padding" Value="12,6" />
+      <Setter Property="SeparatorBrush" Value="Transparent" />
+    </Style>
+
+    <Style Selector="DataGridCell">
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FocusAdorner" Value="{x:Null}" />
+    </Style>
+
+    <!-- Same treatment for the navigation pane. -->
+    <Style Selector="TreeViewItem">
+      <Setter Property="MinHeight" Value="32" />
+    </Style>
+    <!--
+      The theme paints selection and hover on PART_LayoutRoot, which wraps the item AND its
+      children — so a selected or hovered leaf tinted the full height of every ancestor. Rather
+      than fight an internal template we do not control, blank those states out and draw the row
+      ourselves in the item template below (Border.navrow).
+    -->
+    <Style Selector="TreeViewItem /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="TreeViewItem:pointerover /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="TreeViewItem:selected /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="TreeViewItem:selected:pointerover /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- Our own row visual: subtle fill plus a leading accent pill, matching the details list. -->
+    <Style Selector="Border.navrow">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Padding" Value="6,0" />
+      <Setter Property="Margin" Value="0,1" />
+    </Style>
+    <Style Selector="Border.navrow:pointerover">
+      <Setter Property="Background" Value="{DynamicResource ListHoverBrush}" />
+    </Style>
+    <Style Selector="Border.navrow.selected">
+      <Setter Property="Background" Value="{DynamicResource ListSelectedBrush}" />
+    </Style>
+
+    <!--
+      The chevron keeps its stock size. Enlarging the ToggleButton scaled the glyph with it,
+      because the chevron Path stretches to fill its button — so the click tolerance is added in
+      code instead (MainWindow.OnNavPointerPressed), which grows the target without touching the
+      artwork.
+    -->
+    <Style Selector="TreeViewItem /template/ ToggleButton#PART_ExpandCollapseChevron">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="4" />
+    </Style>
+    <Style Selector="TreeViewItem /template/ ToggleButton#PART_ExpandCollapseChevron:pointerover">
+      <Setter Property="Background" Value="{DynamicResource ListHoverBrush}" />
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+    <!-- ── Command bar ───────────────────────────────────────────────────────────────────────
+         The old MainForm carried a MenuStrip AND a ToolStrip duplicating the same 20 actions.
+         Explorer collapses that into one row: a primary "New" split button, then icon commands,
+         then an overflow. Editing commands are wired in the next step. -->
+    <!-- Command bar and address bar sit on the window's own background, the way Explorer's
+         chrome does; only the content area gets a lighter surface. -->
+    <Border Grid.Row="0" Padding="8,6">
+      <StackPanel Orientation="Horizontal" Spacing="2">
+        <!-- One "New" split button replaces the twelve add-tag buttons the old ToolStrip had;
+             its flyout is built from CreatableTypes so it only ever offers what the current
+             container actually accepts. -->
+        <DropDownButton Name="NewTagButton" Classes="cmd" ToolTip.Tip="Add a tag here">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource Icon.Add}" Width="16" Height="16" />
+            <TextBlock Text="New" VerticalAlignment="Center" />
+          </StackPanel>
+          <DropDownButton.Flyout>
+            <MenuFlyout ItemsSource="{Binding Explorer.CreatableTypes}">
+              <MenuFlyout.ItemContainerTheme>
+                <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                  <Setter Property="Header" Value="{Binding Converter={StaticResource TagTypeName}}" />
+                  <Setter Property="Command"
+                          Value="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).Explorer.CreateTagCommand}" />
+                  <Setter Property="CommandParameter" Value="{Binding}" />
+                </ControlTheme>
+              </MenuFlyout.ItemContainerTheme>
+            </MenuFlyout>
+          </DropDownButton.Flyout>
+        </DropDownButton>
+
+        <Rectangle Width="1" Margin="6,4" Fill="{DynamicResource SurfaceStrokeBrush}" />
+
+        <Button Classes="icon" Command="{Binding Explorer.CutCommand}" ToolTip.Tip="Cut (Ctrl+X)">
+          <PathIcon Data="{StaticResource Icon.Cut}" Width="16" Height="16" />
+        </Button>
+        <Button Classes="icon" Command="{Binding Explorer.CopyCommand}" ToolTip.Tip="Copy (Ctrl+C)">
+          <PathIcon Data="{StaticResource Icon.Copy}" Width="16" Height="16" />
+        </Button>
+        <Button Classes="icon" Command="{Binding Explorer.PasteCommand}" ToolTip.Tip="Paste (Ctrl+V)">
+          <PathIcon Data="{StaticResource Icon.Paste}" Width="16" Height="16" />
+        </Button>
+        <Button Classes="icon" Command="{Binding Explorer.RenameCommand}" ToolTip.Tip="Rename (F2)">
+          <PathIcon Data="{StaticResource Icon.Rename}" Width="16" Height="16" />
+        </Button>
+        <Button Classes="icon" Command="{Binding Explorer.DeleteCommand}" ToolTip.Tip="Delete (Del)">
+          <PathIcon Data="{StaticResource Icon.Delete}" Width="16" Height="16" />
+        </Button>
+
+        <Rectangle Width="1" Margin="6,4" Fill="{DynamicResource SurfaceStrokeBrush}" />
+
+        <Button Classes="icon" Command="{Binding Explorer.MoveUpCommand}" ToolTip.Tip="Move up (Ctrl+Up)">
+          <PathIcon Data="{StaticResource Icon.MoveUp}" Width="16" Height="16" />
+        </Button>
+        <Button Classes="icon" Command="{Binding Explorer.MoveDownCommand}" ToolTip.Tip="Move down (Ctrl+Down)">
+          <PathIcon Data="{StaticResource Icon.MoveDown}" Width="16" Height="16" />
+        </Button>
+
+        <Rectangle Width="1" Margin="6,4" Fill="{DynamicResource SurfaceStrokeBrush}" />
+
+        <Button Classes="cmd" Command="{Binding Explorer.SaveCommand}" ToolTip.Tip="Save (Ctrl+S)">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource Icon.Save}" Width="16" Height="16" />
+            <TextBlock Text="Save" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Classes="icon" Command="{Binding Explorer.RefreshCommand}" ToolTip.Tip="Refresh (F5)">
+          <PathIcon Data="{StaticResource Icon.Refresh}" Width="16" Height="16" />
+        </Button>
+
+        <Rectangle Width="1" Margin="6,4" Fill="{DynamicResource SurfaceStrokeBrush}" />
+
+        <Button Name="OpenFileButton" Classes="cmd" ToolTip.Tip="Open file… (Ctrl+O)">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource Icon.File}" Width="16" Height="16" />
+            <TextBlock Text="Open" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Name="OpenFolderButton" Classes="icon" ToolTip.Tip="Open folder… (Ctrl+Shift+O)">
+          <PathIcon Data="{StaticResource Icon.Open}" Width="16" Height="16" />
+        </Button>
+        <Button Classes="icon" Command="{Binding Explorer.CloseAllCommand}" ToolTip.Tip="Close all">
+          <PathIcon Data="{StaticResource Icon.Close}" Width="16" Height="16" />
+        </Button>
+      </StackPanel>
+    </Border>
+
+    <!-- ── Address bar: back / forward / up + breadcrumb ─────────────────────────────────── -->
+    <Border Grid.Row="1" Padding="8,0,8,8" IsVisible="{Binding Explorer.HasOpenNodes}">
+      <Grid ColumnDefinitions="Auto,*">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="2" Margin="0,0,8,0">
+          <Button Classes="icon" Command="{Binding Explorer.GoBackCommand}" ToolTip.Tip="Back (Alt+Left)">
+            <PathIcon Data="{StaticResource Icon.Back}" Width="14" Height="14" />
+          </Button>
+          <Button Classes="icon" Command="{Binding Explorer.GoForwardCommand}" ToolTip.Tip="Forward (Alt+Right)">
+            <PathIcon Data="{StaticResource Icon.Forward}" Width="14" Height="14" />
+          </Button>
+          <Button Classes="icon" Command="{Binding Explorer.GoUpCommand}" ToolTip.Tip="Up (Alt+Up)">
+            <PathIcon Data="{StaticResource Icon.Up}" Width="14" Height="14" />
+          </Button>
+        </StackPanel>
+
+        <Border Grid.Column="1" CornerRadius="4" Padding="4,0" MinHeight="32"
+                Background="{DynamicResource ControlFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                BorderThickness="1">
+          <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+            <ItemsControl Name="Breadcrumb" ItemsSource="{Binding Explorer.Breadcrumb}"
+                          VerticalAlignment="Center">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:NodeViewModel">
+                  <StackPanel Orientation="Horizontal">
+                    <Button Classes="crumb" Tag="{Binding}"
+                            Click="OnBreadcrumbClick">
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <PathIcon Data="{Binding IconKey, Converter={StaticResource Res}}"
+                                  Foreground="{Binding BrushKey, Converter={StaticResource Res}}"
+                                  Width="14" Height="14" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+                    <TextBlock Text="›" VerticalAlignment="Center" Opacity="0.45" />
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Border>
+      </Grid>
+    </Border>
+
+    <!-- ── Navigation pane + details list ───────────────────────────────────────────────── -->
+    <Grid Grid.Row="2" ColumnDefinitions="260,Auto,*">
+
+      <!-- Nav pane: containers only, exactly as Explorer's tree shows folders only. -->
+      <TreeView Name="NavTree" Grid.Column="0"
+                ItemsSource="{Binding Explorer.NavRoots}"
+                SelectionMode="Single"
+                Padding="4,8"
+                Background="Transparent"
+                IsVisible="{Binding Explorer.HasOpenNodes}">
+        <TreeView.ItemContainerTheme>
+          <ControlTheme TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}"
+                        x:DataType="vm:NodeViewModel">
+            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+            <!-- Two-way, so the pane both drives navigation and follows it when the current
+                 folder changes from the details list, the breadcrumb or Back. -->
+            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+            <Setter Property="IsVisible" Value="{Binding IsFilteredIn}" />
+          </ControlTheme>
+        </TreeView.ItemContainerTheme>
+        <TreeView.ItemTemplate>
+          <!-- NavChildren, not Children: binding the full set gives every compound an expander,
+               including ones holding only scalars, where expanding does nothing visible. -->
+          <TreeDataTemplate DataType="vm:NodeViewModel" ItemsSource="{Binding NavChildren}">
+            <Border Classes="navrow" Classes.selected="{Binding IsSelected}">
+              <StackPanel Orientation="Horizontal" Spacing="8" Height="28">
+                <!-- Leading accent pill, the Win11 cue for "this is where you are". -->
+                <Border Width="3" Height="16" CornerRadius="2" VerticalAlignment="Center"
+                        Background="{DynamicResource AccentPillBrush}"
+                        IsVisible="{Binding IsSelected}" />
+                <PathIcon Data="{Binding IconKey, Converter={StaticResource Res}}"
+                          Foreground="{Binding BrushKey, Converter={StaticResource Res}}"
+                          Width="16" Height="16" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" />
+                <Ellipse Width="6" Height="6" VerticalAlignment="Center"
+                         Fill="{DynamicResource ModifiedDotBrush}"
+                         IsVisible="{Binding IsModified}"
+                         ToolTip.Tip="Modified — unsaved" />
+              </StackPanel>
+            </Border>
+          </TreeDataTemplate>
+        </TreeView.ItemTemplate>
+      </TreeView>
+
+      <GridSplitter Grid.Column="1" Width="4" ResizeDirection="Columns"
+                    Background="Transparent" />
+
+      <!-- Explorer's content area is a lighter surface with a rounded leading corner, which is
+           what separates it from the navigation pane instead of a divider line. -->
+      <Border Grid.Column="2"
+              Background="{DynamicResource ContentSurfaceBrush}"
+              BorderBrush="{DynamicResource SurfaceStrokeBrush}"
+              BorderThickness="1,1,0,0"
+              CornerRadius="8,0,0,0"
+              ClipToBounds="True">
+        <Panel>
+        <DataGrid Name="ItemsGrid"
+                  ItemsSource="{Binding Explorer.Items}"
+                  IsVisible="{Binding Explorer.HasOpenNodes}"
+                  AutoGenerateColumns="False"
+                  CanUserReorderColumns="True"
+                  CanUserResizeColumns="True"
+                  CanUserSortColumns="True"
+                  SelectionMode="Extended"
+                  IsReadOnly="True">
+          <DataGrid.ContextMenu>
+            <ContextMenu x:DataType="vm:MainWindowViewModel">
+              <MenuItem Header="Edit value…" Command="{Binding Explorer.EditCommand}"
+                        InputGesture="Enter">
+                <MenuItem.Icon>
+                  <PathIcon Data="{StaticResource Icon.Rename}" Width="14" Height="14" />
+                </MenuItem.Icon>
+              </MenuItem>
+              <MenuItem Header="Rename…" Command="{Binding Explorer.RenameCommand}"
+                        InputGesture="F2" />
+              <Separator />
+              <MenuItem Header="Cut" Command="{Binding Explorer.CutCommand}" InputGesture="Ctrl+X" />
+              <MenuItem Header="Copy" Command="{Binding Explorer.CopyCommand}" InputGesture="Ctrl+C" />
+              <MenuItem Header="Paste" Command="{Binding Explorer.PasteCommand}" InputGesture="Ctrl+V" />
+              <Separator />
+              <MenuItem Header="Move up" Command="{Binding Explorer.MoveUpCommand}"
+                        InputGesture="Ctrl+Up" />
+              <MenuItem Header="Move down" Command="{Binding Explorer.MoveDownCommand}"
+                        InputGesture="Ctrl+Down" />
+              <Separator />
+              <MenuItem Header="Delete" Command="{Binding Explorer.DeleteCommand}"
+                        InputGesture="Delete" />
+            </ContextMenu>
+          </DataGrid.ContextMenu>
+          <DataGrid.Columns>
+            <DataGridTemplateColumn Header="Name" Width="2*" IsReadOnly="True" SortMemberPath="Name">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate DataType="vm:NodeViewModel">
+                  <StackPanel Orientation="Horizontal" Spacing="8" Margin="4,0,10,0"
+                              VerticalAlignment="Center">
+                    <!-- Win11's selection cue is this accent pill on the leading edge, not a
+                         coloured row. Without it a subtle fill alone reads as "nothing selected". -->
+                    <Border Width="3" Height="16" CornerRadius="2" Margin="0,0,4,0"
+                            VerticalAlignment="Center"
+                            Background="{DynamicResource AccentPillBrush}"
+                            IsVisible="{Binding $parent[DataGridRow].IsSelected,
+                                                FallbackValue=False}" />
+                    <PathIcon Data="{Binding IconKey, Converter={StaticResource Res}}"
+                              Foreground="{Binding BrushKey, Converter={StaticResource Res}}"
+                              Width="16" Height="16" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" />
+                    <Ellipse Width="6" Height="6" VerticalAlignment="Center"
+                             Fill="{DynamicResource ModifiedDotBrush}"
+                             IsVisible="{Binding IsModified}"
+                             ToolTip.Tip="Modified — unsaved" />
+                  </StackPanel>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+            <DataGridTextColumn Header="Type" Width="130" IsReadOnly="True"
+                                Binding="{Binding TypeName}" />
+
+            <DataGridTextColumn Header="Value" Width="3*" IsReadOnly="True"
+                                Binding="{Binding ValueText}" />
+          </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Empty state -->
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12"
+                    MaxWidth="380"
+                    IsVisible="{Binding !Explorer.HasOpenNodes}">
+          <PathIcon Data="{StaticResource Icon.Root}" Width="48" Height="48" Opacity="0.35"
+                    HorizontalAlignment="Center" />
+          <TextBlock Text="Nothing open" FontSize="20" FontWeight="SemiBold"
+                     HorizontalAlignment="Center" Opacity="0.7" />
+          <TextBlock Text="Open a world folder, a level.dat, or a region file to begin."
+                     HorizontalAlignment="Center" TextAlignment="Center"
+                     TextWrapping="Wrap" Opacity="0.55" />
+          <TextBlock Text="You can also drop files onto this window."
+                     HorizontalAlignment="Center" Opacity="0.4" FontSize="12" />
+        </StackPanel>
+        </Panel>
+      </Border>
+    </Grid>
+
+    <!-- ── Status bar ───────────────────────────────────────────────────────────────────── -->
+    <Border Grid.Row="3" Padding="12,6"
+            Background="{DynamicResource ContentSurfaceBrush}"
+            BorderBrush="{DynamicResource SurfaceStrokeBrush}"
+            BorderThickness="0,1,0,0">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <TextBlock Grid.Column="0" Text="{Binding Explorer.SelectionSummary}"
+                   VerticalAlignment="Center" Opacity="0.75"
+                   TextTrimming="CharacterEllipsis" />
+        <TextBlock Grid.Column="1" Text="{Binding Explorer.StatusText}"
+                   VerticalAlignment="Center" Opacity="0.55" Margin="16,0"
+                   TextTrimming="CharacterEllipsis" />
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6"
+                    IsVisible="{Binding Explorer.IsAnyModified}">
+          <Ellipse Width="6" Height="6" VerticalAlignment="Center"
+                   Fill="{DynamicResource ModifiedDotBrush}" />
+          <TextBlock Text="Unsaved changes" VerticalAlignment="Center" Opacity="0.75" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+  </Grid>
+</Window>
+
