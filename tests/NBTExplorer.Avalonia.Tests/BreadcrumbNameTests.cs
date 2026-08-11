@@ -118,14 +118,10 @@ public class BreadcrumbNameTests
 
     private static string? FindTestData(string name)
     {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "NBTExplorer.sln")))
-            dir = dir.Parent;
-
-        if (dir is null)
+        if (IconMapTests.FindRepoRoot() is not { } root)
             return null;
 
-        string candidate = Path.Combine(dir.FullName, "testdata", name);
+        string candidate = Path.Combine(root, "testdata", name);
         return File.Exists(candidate) ? candidate : null;
     }
 

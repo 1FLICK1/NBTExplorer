@@ -89,7 +89,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Substrate">
-      <HintPath>..\References\Substrate.dll</HintPath>
+      <HintPath>..\..\References\Substrate.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -309,7 +309,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NBTModel\NBTModel.csproj">
+    <ProjectReference Include="..\..\NBTModel\NBTModel.csproj">
       <Project>{20d7cba3-5b6d-40b0-8d28-4c9a58e4ffbc}</Project>
       <Name>NBTModel</Name>
     </ProjectReference>
@@ -329,6 +329,6 @@
       <Staging Include="$(OutputPath)\**\*.exe.config" />
       <Staging Include="$(ProjectDir)\**\*.visualelementsmanifest.xml" />
     </ItemGroup>
-    <Copy SourceFiles="@(Staging)" DestinationFolder="..\Staging\%(RecursiveDir)" />
+    <Copy SourceFiles="@(Staging)" DestinationFolder="..\..\Staging\%(RecursiveDir)" />
   </Target>
 </Project>

@@ -19,17 +19,19 @@ The UI is being rewritten on [Avalonia](https://avaloniaui.net/) (Fluent 2 / Win
 language, one codebase for Windows, Linux and macOS). Both front-ends sit on the same UI-free
 `NBTModel` layer.
 
-| | `NBTExplorer` (WinForms) | `NBTExplorer.Avalonia` |
+| | `legacy/NBTExplorer` (WinForms) | `NBTExplorer.Avalonia` |
 |---|---|---|
 | Runtime | .NET Framework 2.0 | .NET 10 |
-| Solution | `NBTExplorer.sln` | `NBTExplorer.Avalonia.slnx` |
+| Solution | `legacy/NBTExplorer.sln` | `NBTExplorer.Avalonia.slnx` |
 | Status | Reference implementation, frozen | Under construction |
 | Browsing | yes | yes |
-| Editing / search | yes | not yet |
+| Editing | yes | yes |
+| Search | yes | not yet |
 
-The WinForms tree is the behavioural reference and its project files are deliberately left
-untouched. Note that building it needs Visual Studio and the .NET Framework 3.5 targeting pack;
-without those, `NBTExplorer.sln` will not build (`MSB3645`).
+The WinForms tree lives under `legacy/` and is the behavioural reference. Building it needs Visual
+Studio and the .NET Framework 3.5 targeting pack; without those it will not build (`MSB3645`).
+
+`NBTModel` stays at the top level because both front-ends build against it.
 
 ## Building the Avalonia app
 
@@ -74,6 +76,6 @@ Windows XP or later, .NET Framework 2.0 or later.
 Under Linux it runs on recent Mono runtimes, at least 2.6 or later; minimally you need the
 `mono-core` and `mono-winforms` packages, or whatever package set is equivalent.
 
-A separate Mac version with a native UI once existed (`NBTExplorerMac.csproj`), but it no longer
-builds — it references source files that have since moved into `NBTModel`. The Avalonia app
-replaces it.
+A separate Mac version with a native UI once existed (MonoMac), but it had stopped building — it
+referenced source files that had since moved into `NBTModel` — and has been removed. The Avalonia
+app replaces it.

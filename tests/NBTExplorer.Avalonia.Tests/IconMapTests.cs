@@ -94,8 +94,9 @@ public class IconMapTests
     {
         // The .axaml files ship as AvaloniaResource, not as content beside the test assembly, so
         // read them from the source tree.
-        string root = FindRepoRoot();
-        string path = Path.Combine(root, "NBTExplorer.Avalonia", relativePath.Replace('/', Path.DirectorySeparatorChar));
+        string? root = FindRepoRoot();
+        Assert.NotNull(root);
+        string path = Path.Combine(root!, "NBTExplorer.Avalonia", relativePath.Replace('/', Path.DirectorySeparatorChar));
         Assert.True(File.Exists(path), $"missing {path}");
 
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
@@ -105,12 +106,15 @@ public class IconMapTests
             .Where(v => v is not null)!;
     }
 
-    private static string FindRepoRoot()
+    /// <summary>
+    /// global.json marks the repository root. It is a better anchor than a solution file, which
+    /// can move — the legacy solution did exactly that when it went into legacy\.
+    /// </summary>
+    internal static string? FindRepoRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "NBTExplorer.sln")))
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "global.json")))
             dir = dir.Parent;
-        Assert.NotNull(dir);
-        return dir!.FullName;
+        return dir?.FullName;
     }
 }

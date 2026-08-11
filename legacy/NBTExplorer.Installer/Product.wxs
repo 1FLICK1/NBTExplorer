@@ -73,25 +73,25 @@
 
     <ComponentGroup Id="CG.ProductComponents" Directory="INSTALLDIR">
       <Component Id="C.NBTExplorer.exe" Guid="*">
-        <File Source="../Staging/NBTExplorer.exe" KeyPath="yes" />
+        <File Source="../../Staging/NBTExplorer.exe" KeyPath="yes" />
       </Component>
       <Component Id="C.NBTExplorer.exe.config" Guid="*">
-        <File Source="../Staging/NBTExplorer.exe.config" KeyPath="yes" />
+        <File Source="../../Staging/NBTExplorer.exe.config" KeyPath="yes" />
       </Component>
       <Component Id="C.NBTExplorer.visualelementsmanifest.xml" Guid="*">
-        <File Source="../Staging/Windows/NBTExplorer.visualelementsmanifest.xml" KeyPath="yes" />
+        <File Source="../../Staging/Windows/NBTExplorer.visualelementsmanifest.xml" KeyPath="yes" />
       </Component>
       <Component Id="C.NBTUtil.exe" Guid="*">
-        <File Source="../Staging/NBTUtil.exe" KeyPath="yes" />
+        <File Source="../../Staging/NBTUtil.exe" KeyPath="yes" />
       </Component>
       <Component Id="C.NBTUtil.exe.config" Guid="*">
-        <File Source="../Staging/NBTUtil.exe.config" KeyPath="yes" />
+        <File Source="../../Staging/NBTUtil.exe.config" KeyPath="yes" />
       </Component>
       <Component Id="C.NBTModel.dll" Guid="*">
-        <File Source="../Staging/NBTModel.dll" KeyPath="yes" />
+        <File Source="../../Staging/NBTModel.dll" KeyPath="yes" />
       </Component>
       <Component Id="C.Substrate.dll" Guid="*">
-        <File Source="../Staging/Substrate.dll" KeyPath="yes" />
+        <File Source="../../Staging/Substrate.dll" KeyPath="yes" />
       </Component>
     </ComponentGroup>
 	</Fragment>

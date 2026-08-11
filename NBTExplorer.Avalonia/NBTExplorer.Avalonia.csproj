@@ -11,7 +11,8 @@
 
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>..\NBTExplorer\dead_bush.ico</ApplicationIcon>
+    <!-- Its own copy, so the project does not reach into the legacy tree for a build input. -->
+    <ApplicationIcon>Assets\dead_bush.ico</ApplicationIcon>
 
     <!-- Compiled bindings: binding errors become build errors instead of silent runtime no-ops. -->
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>

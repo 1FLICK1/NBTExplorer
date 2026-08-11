@@ -14,9 +14,9 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "NBTExplorer.Installer", "NB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NBTUtil", "NBTUtil\NBTUtil.csproj", "{BD90EED5-97B9-47D5-AFEA-C2C0D0E59FCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NBTModel", "NBTModel\NBTModel.csproj", "{20D7CBA3-5B6D-40B0-8D28-4C9A58E4FFBC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NBTModel", "..\NBTModel\NBTModel.csproj", "{20D7CBA3-5B6D-40B0-8D28-4C9A58E4FFBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Substrate (NET2)", "..\Substrate\SubstrateCS\Substrate (NET2).csproj", "{AFE30E14-3F2F-4461-9F7D-147AB4DCA4C3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Substrate (NET2)", "..\..\Substrate\SubstrateCS\Substrate (NET2).csproj", "{AFE30E14-3F2F-4461-9F7D-147AB4DCA4C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
