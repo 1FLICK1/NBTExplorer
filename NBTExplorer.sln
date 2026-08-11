@@ -118,6 +118,5 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = NBTExplorerMac.csproj
 	EndGlobalSection
 EndGlobal
