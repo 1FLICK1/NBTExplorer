@@ -6,3 +6,11 @@ obj
 *.userprefs
 Staging/
 UpgradeLog*.htm
+
+# NBTModel.Net10.csproj lives beside the legacy NBTModel.csproj and must not share
+# its bin\/obj\, or the two builds corrupt each other's intermediate output.
+bin.net10/
+obj.net10/
+
+# Real Minecraft world files used for manual verification.
+testdata/
