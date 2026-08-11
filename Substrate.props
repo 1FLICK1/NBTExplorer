@@ -1,0 +1,27 @@
+<!--
+  Shared reference to the prebuilt Substrate NBT library.
+
+  Plain <Reference> items are NOT transitive across <ProjectReference>, so every project that
+  names a Substrate type (TagNode, TagType, CompressionType, RegionFile, …) must reference the
+  assembly itself — referencing NBTModel is not enough. Importing this file is that reference.
+
+  Substrate.dll is a .NET 2.0 assembly with no source in this repository. It is pure managed IL
+  with zero P/Invoke, and System.Drawing appears only in Substrate.Data.MapConverter, which
+  nothing here touches. tools\SubstrateProbe verifies it round-trips NBT and region files
+  correctly under .NET 10, including the write path.
+-->
+<Project>
+
+  <ItemGroup>
+    <Reference Include="Substrate">
+      <HintPath>$(MSBuildThisFileDirectory)References\Substrate.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- "Assembly targets a different framework" — expected and verified. -->
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+  </PropertyGroup>
+
+</Project>
