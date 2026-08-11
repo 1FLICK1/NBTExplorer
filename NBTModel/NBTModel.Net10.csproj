@@ -1,0 +1,56 @@
+<!--
+  Modern .NET build of NBTModel, living beside the legacy NBTModel.csproj (.NET Framework 2.0).
+
+  Why a second project file instead of <TargetFrameworks>net20;net10.0</TargetFrameworks>:
+  NBTExplorer.csproj and NBTUtil.csproj hold legacy (non-SDK) <ProjectReference>s to
+  NBTModel.csproj. A legacy project calls GetTargetPath without a TargetFramework global
+  property, and a cross-targeting outer build has no single target path to hand back — you get
+  either a hard error or a silently wrong assembly. Fixing that would mean converting
+  NBTExplorer.csproj too, which is exactly what we are avoiding: the WinForms app must keep
+  building untouched as the reference implementation until Avalonia reaches parity.
+
+  Consequence: NBTModel.csproj must stay byte-identical, and new source files added here are
+  picked up automatically while the legacy project needs a hand-edited <Compile Include>.
+  That asymmetry is intended.
+
+  NOTE the explicit Sdk.props/Sdk.targets imports rather than the usual <Project Sdk="...">
+  attribute. BaseIntermediateOutputPath MUST be set before Microsoft.Common.props is imported,
+  or NuGet writes project.assets.json into the shared obj\ that the legacy project also uses —
+  which is precisely how the two builds corrupt each other. The attribute form imports too early.
+-->
+<Project>
+
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>obj.net10\</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin.net10\</BaseOutputPath>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>NBTModel</AssemblyName>
+    <RootNamespace>NBTExplorer.Model</RootNamespace>
+    <LangVersion>latest</LangVersion>
+
+    <!-- 3.3k lines of legacy code. Enabling nullable would emit hundreds of warnings for zero
+         behavioural benefit; it is enabled in the new Avalonia project instead. -->
+    <Nullable>disable</Nullable>
+
+    <!-- Properties\AssemblyInfo.cs already exists; SDK-generated attributes would collide (CS0579). -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+    <DefaultItemExcludes>$(DefaultItemExcludes);bin\**;obj\**;bin.net10\**;obj.net10\**</DefaultItemExcludes>
+
+    <!-- WINDOWS gates hex editing of *ArrayDataNode (see TagByteArrayDataNode.CanEditNode).
+         Historically it meant "a hex editor exists in this front-end" — the MonoMac build had
+         none. The Avalonia front-end supplies FormRegistry.EditByteArray, so it stays defined. -->
+    <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+
+  </PropertyGroup>
+
+  <Import Project="..\Substrate.props" />
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+</Project>
